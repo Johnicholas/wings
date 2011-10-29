@@ -55,19 +55,16 @@ insert_before([]) ->
 menu_entry() ->
     {?__(1,"Text"),text,?__(2,"Convert text to a 3D object"),[option]}.
 
-command({shape,{text,Ask}}, _St) -> 
-    make_text(Ask);
-    
+command({shape,{text,Ask}}, St) -> make_text(Ask, St);
 command(_, _) -> next.
 
-
-make_text(Ask) when is_atom(Ask) ->
+make_text(Ask, St) when is_atom(Ask) ->
     FontDir = wpa:pref_get(wpc_tt, fontdir, sysfontdir()),
     FontName = wpa:pref_get(wpc_tt, fontname, default_font(FontDir)),
     Text = wpa:pref_get(wpc_tt, text, "Wings 3D"),
     Bisect = wpa:pref_get(wpc_tt, bisections, 0),
     FontDirectory = filename:join([FontDir,FontName]),
-    wpa:dialog(Ask, ?__(1,"Create Text"),
+    wings_ask:dialog_preview({shape,text}, Ask, ?__(1,"Create Text"),
         [{vframe,
           [{hframe,
             [{vframe,
@@ -80,10 +77,9 @@ make_text(Ask) when is_atom(Ask) ->
                {button,{text,FontDirectory,[{key,{wpc_tt,fontdir}},
                    {props,[{dialog_type,open_dialog},
                    {extensions,[{".ttf",?__(3,"TrueType font")}]}]}]}}]},
-            {vframe,[help_button()]}]}]}],
-    fun(Res) -> {shape,{text,Res}} end);
+            {vframe,[help_button()]}]}]}], St);
 
-make_text([{_,T},{_,N},{_,DirFont}]) ->
+make_text([{_,T},{_,N},{_,DirFont}], _) ->
     F = filename:basename(DirFont),
     D = filename:dirname(DirFont),
     gen(F, D, T, N).
