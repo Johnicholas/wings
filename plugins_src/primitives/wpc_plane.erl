@@ -30,67 +30,63 @@ plane_menu() ->
      {?__(3,"Wavy Plane"),wavyplane,[option]},
      {?__(4,"Sombrero Plane"),sombreroplane,[option]}].
 
-command({shape,{regularplane  ,Ask}},_St) -> make_regular_plane(Ask);
-command({shape,{lumpyplane    ,Ask}},_St) -> make_lumpy_plane(Ask);
-command({shape,{wavyplane     ,Ask}},_St) -> make_wavy_plane(Ask);
-command({shape,{sombreroplane ,Ask}},_St) -> make_sombrero_plane(Ask);
+command({shape,{regularplane  ,Ask}}, St) -> make_regular_plane(Ask, St);
+command({shape,{lumpyplane    ,Ask}}, St) -> make_lumpy_plane(Ask, St);
+command({shape,{wavyplane     ,Ask}}, St) -> make_wavy_plane(Ask, St);
+command({shape,{sombreroplane ,Ask}}, St) -> make_sombrero_plane(Ask, St);
 command(_, _) -> next.
 
 %%% The rest are local functions.
 
 % ======= Regular Plane =======
-make_regular_plane(Ask) when is_atom(Ask) ->
-    wpa:ask(Ask, ?__(1,"Create Regular Plane"),
-	    [{?__(2,"Resolution"),7},
-	     {?__(3,"Size"),2.0},
-	     {?__(4,"Thickness"), 0.1}],
-	    fun(Res) -> {shape,{regularplane,Res}} end);
-make_regular_plane([Nres, Size, Thickness]) ->
+make_regular_plane(Ask, St) when is_atom(Ask) ->
+    Qs = [{?__(2,"Resolution"),7},
+          {?__(3,"Size"),2.0},
+          {?__(4,"Thickness"), 0.1}],
+    wings_ask:ask_preview({shape,regularplane}, Ask, ?__(1,"Create Regular Plane"), Qs, St);
+make_regular_plane([Nres, Size, Thickness], _) ->
     Vs = regular_plane_verts(Nres, Size, +Thickness/2) ++
 	 regular_plane_verts(Nres, Size, -Thickness/2),
     Fs = plane_faces(Nres, Nres),
     {new_shape,"Regular Plane",Fs,Vs}.
 
 % ======= Lumpy Plane =======
-make_lumpy_plane(Ask) when is_atom(Ask) ->
-    wpa:ask(Ask, ?__(1,"Create Lumpy Plane"),
-	    [{?__(2,"Resolution"),30},
-	     {?__(3,"Size"),2.0},
-	     {?__(4,"Lumps"),2},
-	     {?__(5,"Thickness"), 0.1}],
-	    fun(Res) -> {shape,{lumpyplane,Res}} end);
-make_lumpy_plane([Nres, Size, Lumps, Thickness]) ->
+make_lumpy_plane(Ask, St) when is_atom(Ask) ->
+    Qs = [{?__(2,"Resolution"),30},
+          {?__(3,"Size"),2.0},
+          {?__(4,"Lumps"),2},
+          {?__(5,"Thickness"), 0.1}],
+    wings_ask:ask_preview({shape,lumpyplane}, Ask, ?__(1,"Create Lumpy Plane"), Qs, St);
+make_lumpy_plane([Nres, Size, Lumps, Thickness], _) ->
     Vs = lumpy_plane_verts(Nres, Size, Lumps, +Thickness/2) ++
 	 lumpy_plane_verts(Nres, Size, Lumps, -Thickness/2),
     Fs = plane_faces(Nres, Nres),
     {new_shape,"Lumpy Plane",Fs,Vs}.
 
 % ======= Wavy Plane =======
-make_wavy_plane(Ask) when is_atom(Ask) ->
-    wpa:ask(Ask, ?__(1,"Make Wavy Plane"),
-	    [{?__(2,"Resolution"),60},
-	     {?__(3,"Size"),2.0},
-	     {?__(4,"Waves"),4},
-	     {?__(5,"Height"), 0.2},
-	     {?__(6,"Thickness"), 0.1}],
-	    fun(Res) -> {shape,{wavyplane,Res}} end);
-make_wavy_plane([Nres, Size, Waves, Height, Thickness]) ->
+make_wavy_plane(Ask, St) when is_atom(Ask) ->
+    Qs = [{?__(2,"Resolution"),60},
+          {?__(3,"Size"),2.0},
+          {?__(4,"Waves"),4},
+          {?__(5,"Height"), 0.2},
+          {?__(6,"Thickness"), 0.1}],
+    wings_ask:ask_preview({shape,wavyplane}, Ask, ?__(1,"Make Wavy Plane"), Qs, St);
+make_wavy_plane([Nres, Size, Waves, Height, Thickness], _) ->
     Vs = wavy_plane_verts(Nres, Size, Waves, Height, +Thickness/2) ++
 	 wavy_plane_verts(Nres, Size, Waves, Height, -Thickness/2),
     Fs = plane_faces(Nres, Nres),
     {new_shape,"Wavy Plane",Fs,Vs}.
 
 % ======= Sombrero Plane =======
-make_sombrero_plane(Ask) when is_atom(Ask) ->
-    wpa:ask(Ask, ?__(1,"Make Sombrero Plane"),
-	    [{?__(2,"Resolution"),60},
-	     {?__(3,"Size"),2.0},
-	     {?__(4,"Waves"),4},
-	     {?__(5,"Falloff"),1},
-	     {?__(6,"Height"), 1},
-	     {?__(7,"Thickness"), 0.1}],
-	    fun(Res) -> {shape,{sombreroplane,Res}} end);
-make_sombrero_plane([Nres, Size, Waves, Falloff, Height, Thickness]) ->
+make_sombrero_plane(Ask, St) when is_atom(Ask) ->
+    Qs = [{?__(2,"Resolution"),60},
+          {?__(3,"Size"),2.0},
+          {?__(4,"Waves"),4},
+          {?__(5,"Falloff"),1},
+          {?__(6,"Height"), 1},
+          {?__(7,"Thickness"), 0.1}],
+    wings_ask:ask_preview({shape,sombreroplane}, Ask, ?__(1,"Make Sombrero Plane"), Qs, St);
+make_sombrero_plane([Nres, Size, Waves, Falloff, Height, Thickness], _) ->
     Vs = sombrero_plane_verts(Nres, Size, Waves, Falloff, Height, +Thickness/2) ++
 	 sombrero_plane_verts(Nres, Size, Waves, Falloff, Height, -Thickness/2),
     Fs = plane_faces(Nres, Nres),

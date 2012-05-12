@@ -28,8 +28,8 @@ gear_menu() ->
     [{?__(1,"Gear"),gear,[option]},
      {?__(2,"Tube"),tube,[option]}].
 
-command({shape,{gear, Ask}},_St) -> make_gear(Ask);
-command({shape,{tube, Ask}},_St) -> make_tube(Ask);
+command({shape,{gear, Ask}}, St) -> make_gear(Ask, St);
+command({shape,{tube, Ask}}, St) -> make_tube(Ask, St);
 command(_, _) -> next.
 
 %%% The rest are local functions.
@@ -37,15 +37,18 @@ command(_, _) -> next.
 % ============
 % === Gear ===
 % ============
-make_gear(Arg) when is_atom(Arg) ->
-    wpa:dialog(Arg, ?__(1,"Gear Options"), gear_dialog(),
-	fun(Res) -> {shape,{gear,Res}} end);
-make_gear(Arg) ->
+make_gear(Arg, St) when is_atom(Arg) ->
+    wings_ask:dialog_preview({shape,gear}, Arg, ?__(1,"Gear Options"), gear_dialog(), St);
+make_gear(Arg, _St) ->
     ArgDict = dict:from_list(Arg),
     NumTeeth = dict:fetch(numteeth, ArgDict),
     Radius1 = dict:fetch(radius1, ArgDict),
-    ToothHeight = dict:fetch(toothheight, ArgDict),
+    ToothHeight0 = dict:fetch(toothheight, ArgDict),
     Thickness = dict:fetch(thickness, ArgDict),
+    ToothHeight = case ToothHeight0 >= Radius1 of
+        true -> Radius1-0.0001;
+        false -> ToothHeight0
+    end,
     Vs = gear_verts(NumTeeth, Radius1, ToothHeight, Thickness),
     Fs = gear_faces(NumTeeth),
     {new_shape,"Gear",Fs,Vs}.
@@ -104,14 +107,13 @@ gear_faces(NumTeeth) ->
 % ============
 % === Tube ===
 % ============
-make_tube(Ask) when is_atom(Ask) ->
-    wpa:ask(Ask, ?__(1,"Tube Options"),
-	[{?__(2,"Resolution"),16},
-	 {?__(3,"Outer Radius"),1.0},
-	 {?__(4,"Inner Radius"),0.8},
-	 {?__(5,"Length"),2.0}],
-	fun(Res) -> {shape,{tube,Res}} end);
-make_tube([Nres, Radius1, Radius2, Length]) ->
+make_tube(Ask, St) when is_atom(Ask) ->
+    Qs = [{?__(2,"Resolution"),16},
+          {?__(3,"Outer Radius"),1.0},
+          {?__(4,"Inner Radius"),0.8},
+          {?__(5,"Length"),2.0}],
+    wings_ask:ask_preview({shape,tube}, Ask, ?__(1,"Tube Options"), Qs, St);
+make_tube([Nres, Radius1, Radius2, Length], _St) ->
     Vs = tube_verts(Nres, Radius1, Radius2, Length),
     Fs = tube_faces(Nres),
     {new_shape,?__(6,"Tube"),Fs,Vs}.
